@@ -1,3 +1,15 @@
+
+/*********************************************************************************
+*  WEB322 – Assignment 02
+*  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source 
+*  (including 3rd party web sites) or distributed to other students.
+* 
+*  Name: __Thi Huyen Nguyen____ Student ID: _129494225____ Date: _June 1 2023____
+*
+*  Online (Cyclic) Link: _____https://web322-assignment2.cyclic.app/about ________
+*
+********************************************************************************/ 
+
 var express = require ("express");
 const path = require ("path");
 const data = require("./store-service");
