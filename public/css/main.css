@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans&display=swap');
+/* Styles for 'nav-item' */
+.navbar-nav .nav-item .nav-link {
+    color: #fff; /* Set the text color */
+    font-weight: bold; /* Set the font weight */
+  }
+  
+  .navbar-brand{
+    margin-right: 500px;
+  }
+  /* Background color for body */
+  body {
+    
+    background-color: #849684;
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* Background color for navbar */
+  .navbar {
+    background-color: #343a40; /* Set the background color */
+  }
+.navbar-collapse
+      {
+        flex-grow: 0;
+    }
+
+.container-fluid{
+    width: 100%;
+    top: 0;
+    z-index: 1;
+}
+
+.nav-item:hover .nav-link {
+  color: rgb(59, 196, 73);
+  /* Add any other desired styles for the hover effect */
+}
+
+
+
+ 
+  /* Font for class 'col-md-3' */
+  .col-md-3 {
+       
+    font-family:  Work Sans, sans-serif;
+    background-color: #b0caba; 
+    justify-content: center;
+    align-content: center;    
+    
+    text-align: justify;
+  }
+  @media (min-width: 1200px) {
+    .col-md-3 {
+      border-right: 1px solid black;
+    }
+  }
+  
+  
+  /* Font for class 'main col-md-9' */
+  .main.col-md-9 {
+    font-family:  Work Sans, sans-serif;
+    justify-content: center;
+    align-items: center;
+    background-color: #b0caba; 
+    text-align: justify;
+    
+    
+  }
+  
+  .container{
+    padding-top: 60px;
+  }
+
+
+
+  
+h2 {
+    color: black;
+    font-weight: 600;
+    font-family: Baloo2, cursive;
+    font-size: 2em;
+    margin-top: 40px;
+    text-align: center;
+}
+  
