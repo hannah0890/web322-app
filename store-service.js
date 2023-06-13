@@ -59,5 +59,59 @@ module.exports.getCategories = function(){
         }
     })
 }
+//A3
+module.exports.addItem = function(itemData){
+    return new Promise((resolve, reject)=>{
+        if (itemData.published = undefined){
+            itemData.published = false;
+        }
+        else{
+            itemData.published = true;
+        }
+        
+        itemData.id = items.length + 1;
+        items.push(itemData);
+        resolve(itemData);
+        reject("error");
+    })
+}
 
+module.exports.getItemsByCategory = function(category){
+    return new Promise((resolve, reject)=>{
+        const filteredItems = items.filter((item)=>item.category == category);
+        if(filteredItems.length == 0){
+            reject("No results returned");
+        } 
+        else{
+            resolve(filteredItems);
+        }
+    })
+}
 
+module.exports.getItemsByMinDate = function(minDateStr){
+    return new Promise((resolve, reject)=>{
+        const minDate = new Date (minDateStr);
+        const filteredItems = items.filter((item)=>{
+            const postDate = new Date(item.postDate);
+            return postDate >= minDate;
+        });
+        if(filteredItems.length == 0){
+            reject ("No results returned");
+        }
+        else{
+            resolve(filteredItems);
+        }
+    })
+}
+
+module.exports.getItemById = function(id){
+    return new Promise ((resolve, reject)=>{
+        const item = items.find((item)=> item.id == id);
+        if (!item){
+            reject ("No result returned");
+        }
+        else {
+            resolve(item);
+        }
+    })
+}
