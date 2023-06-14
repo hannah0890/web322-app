@@ -14,6 +14,7 @@
 var express = require ("express");
 const path = require ("path");
 const data = require("./store-service");
+const bodyParser = require("body-parser");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
@@ -35,6 +36,7 @@ const upload = multer();
 
 
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //welcome message
 function onHTTPSTART(){
@@ -117,7 +119,7 @@ app.get("/categories", (req,res)=>{
 });
 
 //A3
-app.post('items/add', upload.single('featureImage'), (req, res)=>{
+app.post('/items/add', upload.single('featureImage'), (req, res)=>{
     if(req.file){
         let streamUpload = (req) => {
             return new Promise((resolve, reject) => {
@@ -153,8 +155,16 @@ app.post('items/add', upload.single('featureImage'), (req, res)=>{
          
         // TODO: Process the req.body and add it as a new Item before redirecting to /items
         const itemData = {
-            featureImage: imageUrl,
+            id: req.body.id,
+            category: req.body.category,
+            postDate: req.body.postDate,
+            featureImage: req.body.featureImage,
+            price: req.body.price,
+            title: req.body.title,
+            body: req.body.body,
+            published: req.body.published || false,
         };
+
         data.addItem(itemData).then (()=>{
             res.redirect("/items");
         })      

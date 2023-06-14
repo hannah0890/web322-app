@@ -61,14 +61,8 @@ module.exports.getCategories = function(){
 }
 //A3
 module.exports.addItem = function(itemData){
-    return new Promise((resolve, reject)=>{
-        if (itemData.published = undefined){
-            itemData.published = false;
-        }
-        else{
-            itemData.published = true;
-        }
-        
+    return new Promise(function(resolve, reject){
+        itemData.published = (itemData.published)? true: false;  
         itemData.id = items.length + 1;
         items.push(itemData);
         resolve(itemData);
