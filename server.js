@@ -14,6 +14,7 @@
 var express = require ("express");
 const path = require ("path");
 const data = require("./store-service");
+//A3
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -58,7 +59,7 @@ app.get("/shop",(req,res)=>{
 });
 
 //A3
-//set up rout to addItem page
+//set up route to addItem page
 app.get("/items/add",(req,res)=>{
     res.sendFile(path.join(__dirname,"/views/addItem.html"));
 });
