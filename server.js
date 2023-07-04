@@ -50,6 +50,39 @@ app.use(bodyParser.urlencoded({ extended: true }));
 function onHTTPSTART(){
     console.log("Express http server listening on: " + HTTP_PORT);
 }
+
+//A4
+app.use(function(req, res, next) {
+    let route = req.path.substring(1);
+    app.locals.activeRoute = "/" + (isNaN(route.split('/')[1]) ? route.replace(/\/(?!.*)/, "") : route.replace(/\/(.*)/, ""));
+    app.locals.viewingCategory = req.query.category;
+    app.locals.viewingAbout = req.query.about;
+    app.locals.viewingItems = req.query.item;
+    app.locals.viewingAddItem = req.query.about && req.query.about.additem;
+    next();
+  });
+
+navLink: function Helper (url, options){
+    return(
+        '<li class="nav-item"><a' +
+        (url== app.locals.activeRoute ? 'class="nav-link active"': ' class="nav-link" ') +
+        ' href="' +
+        url + 
+        '">'+
+        options.fn(this) + 
+        "</a></li>"
+    );
+};
+    equal: function Helper (lvalue, rvalue, options) {
+        if (arguments.length < 3)
+            throw new Error("Handlebars Helper equal needs 2 parameters");
+        if (lvalue != rvalue) {
+            return options.inverse(this);
+        } else {
+            return options.fn(this);
+        }
+    
+};  
 //set up route to my about page
 app.get('/about',(req,res)=>{
     res.render('about');
@@ -71,38 +104,37 @@ app.get('/items/add',(req,res)=>{
     res.render('addItem');
 });
 
-//Items route
-app.get("/items",(req,res)=>{
-    if(req.query.category){
-        const category = parseInt(req.query.category);
-        data.getItemsByCategory (category)
-        .then((data)=>{
-            res.json(data);
+//Items route updated
+app.get("/items", (req, res) => {
+    if (req.query.category) {
+      const category = parseInt(req.query.category);
+      data.getItemsByCategory(category)
+        .then((data) => {
+          res.render("items", { items: data, layout: false });
         })
-        .catch ((error)=>{
-            res.status(500).json({message: error});
+        .catch((error) => {
+          res.render("items", { message: "no results" });
+        });
+    } else if (req.query.minDate) {
+      const minDateStr = req.query.minDate;
+      data.getItemsByMinDate(minDateStr)
+        .then((data) => {
+          res.render("items", { items: data, layout: false });
+        })
+        .catch((error) => {
+          res.render("items", { message: "no results" });
+        });
+    } else {
+      data.getAllItems()
+        .then((data) => {
+          res.render("items", { items: data, layout: false });
+        })
+        .catch((error) => {
+          res.render("items", { message: "no results" });
         });
     }
-    else if (req.query.minDate){
-        const minDateStr = req.query.minDate;
-        data.getItemsByMinDate(minDateStr)
-        .then((data)=>{
-            res.json(data);
-        })
-        .catch ((error)=>{
-            res.status(500).json({message: error});
-        })
-    }
-    else{
-        data.getAllItems().then((data)=>{
-            res.json(data);
-        })
-        .catch((error)=>{
-            res.status(500).json({massage:error});
-        });
-    }
-    
-});
+  });
+  
 
 app.get("/item/:id",(req, res)=>{
     data.getItemById(req.params.id)
