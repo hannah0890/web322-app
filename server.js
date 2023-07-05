@@ -26,7 +26,32 @@ var app = express();
 
 const HTTP_PORT = process.env.PORT || 8080;
 //A4 
-app.engine(".hbs", exphbs({ extname: ".hbs" }));
+app.engine(".hbs", exphbs.engine({ 
+    extname: ".hbs",
+    helpers: {
+        navLink: function (url, options){
+        return(
+            '<li class="nav-item"><a' +
+            (url== app.locals.activeRoute ? 'class="nav-link active"': ' class="nav-link" ') +
+            ' href="' +
+            url + 
+            '">'+
+            options.fn(this) + 
+            "</a></li>"
+        );
+    },
+        equal: function (lvalue, rvalue, options) {
+            if (arguments.length < 3)
+                throw new Error("Handlebars Helper equal needs 2 parameters");
+            if (lvalue != rvalue) {
+                return options.inverse(this);
+            } else {
+                return options.fn(this);
+            }
+
+    }
+}
+ }));
 app.set('view engine', '.hbs');
 
 
@@ -56,33 +81,9 @@ app.use(function(req, res, next) {
     let route = req.path.substring(1);
     app.locals.activeRoute = "/" + (isNaN(route.split('/')[1]) ? route.replace(/\/(?!.*)/, "") : route.replace(/\/(.*)/, ""));
     app.locals.viewingCategory = req.query.category;
-    app.locals.viewingAbout = req.query.about;
-    app.locals.viewingItems = req.query.item;
-    app.locals.viewingAddItem = req.query.about && req.query.about.additem;
     next();
   });
 
-navLink: function Helper (url, options){
-    return(
-        '<li class="nav-item"><a' +
-        (url== app.locals.activeRoute ? 'class="nav-link active"': ' class="nav-link" ') +
-        ' href="' +
-        url + 
-        '">'+
-        options.fn(this) + 
-        "</a></li>"
-    );
-};
-    equal: function Helper (lvalue, rvalue, options) {
-        if (arguments.length < 3)
-            throw new Error("Handlebars Helper equal needs 2 parameters");
-        if (lvalue != rvalue) {
-            return options.inverse(this);
-        } else {
-            return options.fn(this);
-        }
-    
-};  
 //set up route to my about page
 app.get('/about',(req,res)=>{
     res.render("about");
@@ -145,7 +146,7 @@ app.get("/items", (req, res) => {
       const category = parseInt(req.query.category);
       data.getItemsByCategory(category)
         .then((data) => {
-          res.render("items", { items: data, layout: false });
+          res.render("items", { items: data});
         })
         .catch((error) => {
           res.render("items", { message: "no results" });
@@ -154,7 +155,7 @@ app.get("/items", (req, res) => {
       const minDateStr = req.query.minDate;
       data.getItemsByMinDate(minDateStr)
         .then((data) => {
-          res.render("items", { items: data, layout: false });
+          res.render("items", { items: data});
         })
         .catch((error) => {
           res.render("items", { message: "no results" });
@@ -162,7 +163,7 @@ app.get("/items", (req, res) => {
     } else {
       data.getAllItems()
         .then((data) => {
-          res.render("items", { items: data, layout: false });
+          res.render("items", { items: data});
         })
         .catch((error) => {
           res.render("items", { message: "no results" });
@@ -306,15 +307,12 @@ app.post('/items/add', upload.single('featureImage'), (req, res)=>{
 app.get("/", (req, res) => {
     res.redirect("/shop");
   });
-  
+
 // 404 error handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
   });
 
-
-  
-  
 
 //app.listen(HTTP_PORT,onHTTPSTART);
 data.initialize().then(function(){
