@@ -50,6 +50,24 @@ module.exports.getPublishedItems = function(){
     })
 }
 
+//A4
+module.exports.getPublishedItemsByCategory = function(){
+    return new Promise((resolve, reject)=>{
+        let publishedItemsByCategory = [];
+        for (let i=0; i < items.length; i++){
+            if(items[i].published == true && items[i].category == category){
+                publishedItemsByCategory.push(items[i]);
+            }
+        }
+        if (publishedItemsByCategory.length == 0){
+            reject("No Items to be displayed")            
+        }
+        else{
+            resolve(publishedItemsByCategory);
+        }
+    })
+}
+
 module.exports.getCategories = function(){
     return new Promise((resolve,reject)=>{
         if(categories.length==0){
@@ -64,6 +82,12 @@ module.exports.addItem = function(itemData){
     return new Promise(function(resolve, reject){
         itemData.published = (itemData.published)? true: false;  
         itemData.id = items.length + 1;
+        
+//Set the post date to the current date
+        var currentDate = new Date();
+        var formattedDate = currentDate.toISOString().slice(0,10);
+        itemData.postDate = formattedDate;
+
         items.push(itemData);
         resolve(itemData);
         reject("error");

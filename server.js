@@ -26,7 +26,7 @@ var app = express();
 
 const HTTP_PORT = process.env.PORT || 8080;
 //A4 
-app.engine('.hbs', exphbs({ extname: '.hbs' }));
+app.engine(".hbs", exphbs({ extname: ".hbs" }));
 app.set('view engine', '.hbs');
 
 
@@ -85,23 +85,58 @@ navLink: function Helper (url, options){
 };  
 //set up route to my about page
 app.get('/about',(req,res)=>{
-    res.render('about');
+    res.render("about");
 });
 
-//shop route
-app.get("/shop",(req,res)=>{
-    data.getPublishedItems().then((data)=>{
-        res.json(data);
-    })
-    .catch((error)=>{
-        res.status(500).json({massage:error});
-    })
-});
+//A4 shop route updated 
+app.get("/shop", async (req, res) => {
+    // Declare an object to store properties for the view
+    let viewData = {};
+  
+    try {
+      // declare empty array to hold "post" objects
+      let items = [];
+  
+      // if there's a "category" query, filter the returned posts by category
+      if (req.query.category) {
+        // Obtain the published "posts" by category
+        items = await data.getPublishedItemsByCategory(req.query.category);
+      } else {
+        // Obtain the published "items"
+        items = await data.getPublishedItems();
+      }
+  
+      // sort the published items by postDate
+      items.sort((a, b) => new Date(b.postDate) - new Date(a.postDate));
+  
+      // get the latest post from the front of the list (element 0)
+      let post = items[0];
+  
+      // store the "items" and "post" data in the viewData object (to be passed to the view)
+      viewData.items = items;
+      viewData.item = item;
+    } catch (err) {
+      viewData.message = "no results";
+    }
+  
+    try {
+      // Obtain the full list of "categories"
+      let categories = await data.getCategories();
+  
+      // store the "categories" data in the viewData object (to be passed to the view)
+      viewData.categories = categories;
+    } catch (err) {
+      viewData.categoriesMessage = "no results";
+    }
+  
+    // render the "shop" view with all of the data (viewData)
+    res.render("shop", { data: viewData });
+  });
 
-//A3
+//A4
 //set up route to addItem page
 app.get('/items/add',(req,res)=>{
-    res.render('addItem');
+    res.render("addItem");
 });
 
 //Items route updated
@@ -146,15 +181,65 @@ app.get("/item/:id",(req, res)=>{
     })
 })
 
-/
+//A4
+
+app.get('/shop/:id', async (req, res) => {
+
+    // Declare an object to store properties for the view
+    let viewData = {};
+  
+    try{
+  
+        // declare empty array to hold "item" objects
+        let items = [];
+  
+        // if there's a "category" query, filter the returned posts by category
+        if(req.query.category){
+            // Obtain the published "posts" by category
+            items = await data.getPublishedItemsByCategory(req.query.category);
+        }else{
+            // Obtain the published "posts"
+            items = await data.getPublishedItems();
+        }
+  
+        // sort the published items by postDate
+        items.sort((a,b) => new Date(b.postDate) - new Date(a.postDate));
+  
+        // store the "items" and "item" data in the viewData object (to be passed to the view)
+        viewData.items = items;
+  
+    }catch(err){
+        viewData.message = "no results";
+    }
+  
+    try{
+        // Obtain the item by "id"
+        viewData.item = await data.getItemById(req.params.id);
+    }catch(err){
+        viewData.message = "no results"; 
+    }
+  
+    try{
+        // Obtain the full list of "categories"
+        let categories = await data.getCategories();
+  
+        // store the "categories" data in the viewData object (to be passed to the view)
+        viewData.categories = categories;
+    }catch(err){
+        viewData.categoriesMessage = "no results"
+    }
+  
+    // render the "shop" view with all of the data (viewData)
+    res.render("shop", {data: viewData})
+  });
 
 //Categories route
 app.get("/categories", (req,res)=>{
     data.getCategories().then((data)=>{
-        res.json(data);
+        res.render("categories", {categories:data});
     })
     .catch((error)=>{
-        res.status(500).json({massage:error});
+        res.render("categories", {massage:error});
     })
 });
 
@@ -217,7 +302,11 @@ app.post('/items/add', upload.single('featureImage'), (req, res)=>{
 });
  
 
-
+// Redirect "/" to "/shop"
+app.get("/", (req, res) => {
+    res.redirect("/shop");
+  });
+  
 // 404 error handler
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, "/views/404.html"));
