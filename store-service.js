@@ -83,7 +83,7 @@ module.exports.addItem = function(itemData){
         itemData.published = (itemData.published)? true: false;  
         itemData.id = items.length + 1;
         
-//Set the post date to the current date
+//A4 Set the post date to the current date
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().slice(0,10);
         itemData.postDate = formattedDate;
