@@ -3,7 +3,7 @@
 /* Styles for 'nav-item' */
 .navbar-nav .nav-item .nav-link 
   {
-    color: #fff; /* Set the text color */
+    color: #fefcfc; /* Set the text color */
     font-weight: bold; /* Set the font weight */
   }
   
@@ -23,7 +23,7 @@ body
   /* Background color for navbar */
   .navbar 
   {
-    background-color: #343a40; /* Set the background color */
+    background-color: #f2f5f7; /* Set the background color */
   }
 .navbar-collapse
     {
