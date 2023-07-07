@@ -5,9 +5,9 @@
 *  No part of this assignment has been copied manually or electronically from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
-*  Name: __Thi Huyen Nguyen____ Student ID: _129494225____ Date: _June 16 2023____
+*  Name: __Thi Huyen Nguyen____ Student ID: _129494225____ Date: _July 6 2023____
 *
-*  Online (Cyclic) Link: _____https://web322-assignment2.cyclic.app/about ________
+*  Online (Cyclic) Link: _____https://web322-assignment2.cyclic.app/shop ________
 *
 ********************************************************************************/ 
 
