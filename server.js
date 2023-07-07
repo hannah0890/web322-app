@@ -7,7 +7,7 @@
 * 
 *  Name: __Thi Huyen Nguyen____ Student ID: _129494225____ Date: _July 6 2023____
 *
-*  Online (Cyclic) Link: _____https://web322-assignment2.cyclic.app/shop ________
+*  Online (Cyclic) Link: _____https://web322-assignment.cyclic.app/shop ________
 *
 ********************************************************************************/ 
 
