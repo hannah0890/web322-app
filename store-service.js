@@ -1,80 +1,48 @@
-const fs = require("fs");
-let items = [];
-let categories =[];
+const Sequelize = require('sequelize');
+var sequelize = new Sequelize('gohairtr','gohairtr','sZCb_ti9cNqQbk_6glXDpOb4izNvSiba',
+{
+    host: 'postgres://gohairtr:sZCb_ti9cNqQbk_6glXDpOb4izNvSiba@stampy.db.elephantsql.com/gohairtr',
+    dialect: 'postgres',
+    port: 5432,
+    dialectOptions: {
+        ssl: {rejectUnauthorized: false}
+    },
+    query: {raw: true}
+});
+
 
 module.exports.initialize = function(){
     return new Promise((resolve,reject)=>{
-        fs.readFile('./data/items.json',(err,data)=>{
-            if(err){
-                reject(err);
-            }else{
-                items = JSON.parse(data);
-                fs.readFile('./data/categories.json',(err,data)=>{
-                    if(err){
-                        reject(err);
-                    }
-                    else{
-                    categories = JSON.parse(data);
-                    resolve();
-                    }
-                })
-            }
-        })
+        reject();
         
-    })    
+})
 }
   
 module.exports.getAllItems = function(){
     return new Promise((resolve,reject)=>{
-        if(items.length==0){
-            reject("No Items to show");
-        }else{
-            resolve(items);
-        }
+        reject();
     })
 }
 
 module.exports.getPublishedItems = function(){
     return new Promise((resolve,reject)=>{
-       let publishedItems = [];
-       for(let i = 0; i< items.length; i++){
-        if(items[i].published==true){
-            publishedItems.push(items[i]);
-        }
-       }
-       if(publishedItems.length==0){
-        reject("No Items to be displayed");
-       }else{
-        resolve(publishedItems);
-       }
+        reject();
+       
     })
 }
 
 //A4
 module.exports.getPublishedItemsByCategory = function(){
     return new Promise((resolve, reject)=>{
-        let publishedItemsByCategory = [];
-        for (let i=0; i < items.length; i++){
-            if(items[i].published == true && items[i].category == category){
-                publishedItemsByCategory.push(items[i]);
-            }
-        }
-        if (publishedItemsByCategory.length == 0){
-            reject("No Items to be displayed")            
-        }
-        else{
-            resolve(publishedItemsByCategory);
-        }
+        reject();
+        
     })
 }
 
 module.exports.getCategories = function(){
     return new Promise((resolve,reject)=>{
-        if(categories.length==0){
-            reject("No Categories to show");
-        }else{
-            resolve(categories);
-        }
+        reject();
+        
     })
 }
 //A3
@@ -96,40 +64,19 @@ module.exports.addItem = function(itemData){
 
 module.exports.getItemsByCategory = function(category){
     return new Promise((resolve, reject)=>{
-        const filteredItems = items.filter((item)=>item.category == category);
-        if(filteredItems.length == 0){
-            reject("No results returned");
-        } 
-        else{
-            resolve(filteredItems);
-        }
+        reject();
+        
     })
 }
 
 module.exports.getItemsByMinDate = function(minDateStr){
     return new Promise((resolve, reject)=>{
-        const minDate = new Date (minDateStr);
-        const filteredItems = items.filter((item)=>{
-            const postDate = new Date(item.postDate);
-            return postDate >= minDate;
-        });
-        if(filteredItems.length == 0){
-            reject ("No results returned");
-        }
-        else{
-            resolve(filteredItems);
-        }
+        reject();
     })
 }
 
 module.exports.getItemById = function(id){
     return new Promise ((resolve, reject)=>{
-        const item = items.find((item)=> item.id == id);
-        if (!item){
-            reject ("No result returned");
-        }
-        else {
-            resolve(item);
-        }
+        reject();
     })
 }

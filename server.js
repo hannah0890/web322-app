@@ -84,10 +84,22 @@ app.use(function(req, res, next) {
     next();
   });
 
+// Redirect "/" to "/shop"
+app.get("/", (req, res) => {
+    res.redirect("/shop");
+  });
+
+  //A4
+//set up route to addItem page
+app.get('/items/add',(req,res)=>{
+    res.render("addItem");
+});
+
 //set up route to my about page
 app.get('/about',(req,res)=>{
     res.render("about");
 });
+
 
 //A4 shop route updated 
 app.get("/shop", async (req, res) => {
@@ -135,55 +147,6 @@ app.get("/shop", async (req, res) => {
   });
 
 //A4
-//set up route to addItem page
-app.get('/items/add',(req,res)=>{
-    res.render("addItem");
-});
-
-//Items route updated
-app.get("/items", (req, res) => {
-    if (req.query.category) {
-      const category = parseInt(req.query.category);
-      data.getItemsByCategory(category)
-        .then((data) => {
-          res.render("items", { items: data});
-        })
-        .catch((error) => {
-          res.render("items", { message: "no results" });
-        });
-    } else if (req.query.minDate) {
-      const minDateStr = req.query.minDate;
-      data.getItemsByMinDate(minDateStr)
-        .then((data) => {
-          res.render("items", { items: data});
-        })
-        .catch((error) => {
-          res.render("items", { message: "no results" });
-        });
-    } else {
-      data.getAllItems()
-        .then((data) => {
-          res.render("items", { items: data});
-        })
-        .catch((error) => {
-          res.render("items", { message: "no results" });
-        });
-    }
-  });
-  
-
-app.get("/item/:id",(req, res)=>{
-    data.getItemById(req.params.id)
-    .then((data)=>{
-        res.json(data);
-    })
-    .catch((error) => {
-        res.status(500).json({message: error});
-    })
-})
-
-//A4
-
 app.get('/shop/:id', async (req, res) => {
 
     // Declare an object to store properties for the view
@@ -234,6 +197,49 @@ app.get('/shop/:id', async (req, res) => {
     res.render("shop", {data: viewData})
   });
 
+//Items route updated
+app.get("/items", (req, res) => {
+    if (req.query.category) {
+      const category = parseInt(req.query.category);
+      data.getItemsByCategory(category)
+        .then((data) => {
+          res.render("items", { items: data});
+        })
+        .catch((error) => {
+          res.render("items", { message: "no results" });
+        });
+    } else if (req.query.minDate) {
+      const minDateStr = req.query.minDate;
+      data.getItemsByMinDate(minDateStr)
+        .then((data) => {
+          res.render("items", { items: data});
+        })
+        .catch((error) => {
+          res.render("items", { message: "no results" });
+        });
+    } else {
+      data.getAllItems()
+        .then((data) => {
+          res.render("items", { items: data});
+        })
+        .catch((error) => {
+          res.render("items", { message: "no results" });
+        });
+    }
+  });
+  
+
+app.get("/item/:id",(req, res)=>{
+    data.getItemById(req.params.id)
+    .then((data)=>{
+        res.json(data);
+    })
+    .catch((error) => {
+        res.status(500).json({message: error});
+    })
+})
+
+
 //Categories route
 app.get("/categories", (req,res)=>{
     data.getCategories().then((data)=>{
@@ -280,40 +286,24 @@ app.post('/items/add', upload.single('featureImage'), (req, res)=>{
         req.body.featureImage = imageUrl;
          
         // TODO: Process the req.body and add it as a new Item before redirecting to /items
-        const itemData = {
-            id: req.body.id,
-            category: req.body.category,
-            postDate: req.body.postDate,
-            featureImage: req.body.featureImage,
-            price: req.body.price,
-            title: req.body.title,
-            body: req.body.body,
-            published: req.body.published || false,
-        };
-
         data.addItem(itemData).then (()=>{
-            res.redirect("/items");
+        res.redirect("/items");
         })      
         .catch((error)=>{
             res.status(500).send("Unable to add item: " + error);
         });
-        
     } 
-    
 });
- 
-
-// Redirect "/" to "/shop"
-app.get("/", (req, res) => {
-    res.redirect("/shop");
-  });
 
 // 404 error handler
-app.use((req, res) => {
+app.get('*', function(req, res){
     res.render("404");
   });
 
-
+  app.use((req,res)=>{
+    res.status(404).send("Page does not exist")
+  })
+  
 //app.listen(HTTP_PORT,onHTTPSTART);
 data.initialize().then(function(){
       app.listen(HTTP_PORT,onHTTPSTART);
