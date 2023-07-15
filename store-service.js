@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
-var sequelize = new Sequelize('gohairtr','gohairtr','sZCb_ti9cNqQbk_6glXDpOb4izNvSiba',
+var sequelize = new Sequelize('gohairtr ','gohairtr ','OtyqFw9wvLXQeKX9lcljs3WSKy91_Os-',
 {
-    host: 'postgres://gohairtr:sZCb_ti9cNqQbk_6glXDpOb4izNvSiba@stampy.db.elephantsql.com/gohairtr',
+    host: 'postgres://gohairtr:OtyqFw9wvLXQeKX9lcljs3WSKy91_Os-@stampy.db.elephantsql.com/gohairtr',
     dialect: 'postgres',
     port: 5432,
     dialectOptions: {
@@ -9,49 +9,105 @@ var sequelize = new Sequelize('gohairtr','gohairtr','sZCb_ti9cNqQbk_6glXDpOb4izN
     },
     query: {raw: true}
 });
-
-
-module.exports.initialize = function(){
-    return new Promise((resolve,reject)=>{
-        reject();
-        
+    sequelize
+    .authenticate()
+    .then(function() {
+        console.log('Connection has been established successfully.');
+    })
+    .catch(function(err) {
+        console.log('Unable to connect to the database:', err);
+    
+});
+//A5
+const Item = sequelize.define("Item",{
+    body: Sequelize.TEXT,
+    title: Sequelize.STRING,
+    postDate: Sequelize.DATE,
+    featureImage: Sequelize.STRING,
+    published: Sequelize.BOOLEAN,
+    price: Sequelize.DOUBLE   
 })
-}
+const Category = sequelize.define("Category",{
+    category: Sequelize.STRING,
+})
+//relationship - belongsTo
+Item.belongsTo(Category,{foreignKey: "category"});
+
+exports.initialize = ()=>{
+    return new Promise ((resolve, reject)=>{
+        sequelize
+        .sync()
+        .then(resolve("database synced!"))
+        .catch(reject("Unable to sync the database!"));
+    })
+};
   
-module.exports.getAllItems = function(){
+exports.getAllItems = function(){
     return new Promise((resolve,reject)=>{
-        reject();
-    })
-}
-
-module.exports.getPublishedItems = function(){
-    return new Promise((resolve,reject)=>{
-        reject();
-       
-    })
-}
-
-//A4
-module.exports.getPublishedItemsByCategory = function(){
+        sequelize
+        .sync()
+        .then(resolve(Item.findAll()))
+        .catch 
+        reject(("No results returned"));
+    });
+};
+exports.getItemsByCategory = function(category){
     return new Promise((resolve, reject)=>{
-        reject();
-        
+        Item.findAll({
+            where:{
+                category: category,
+            },
+        })
+        .then (resolve(Item.findAll({where:{category: category} })))
+        .catch (reject("No results returned"));
+    });
+};
+
+exports.getItemsByMinDate = function(minDateStr){
+    return new Promise((resolve, reject)=>{
+        const {gte} = Sequelize.Op;
+        Item.findAll({
+            where: {
+                postDate: {
+                    [gte]: newDate(minDateStr)
+                }
+            }
+        })
+        .then(resolve(Item.findAll({where:{postDate:{[gte]: newDate(minDateStr)}}})))
+        .catch(reject("No result returned"));
     })
 }
 
-module.exports.getCategories = function(){
-    return new Promise((resolve,reject)=>{
-        reject();
-        
+exports.getItemById = function(id){
+    return new Promise ((resolve, reject)=>{
+        Item.findAll({
+            where: {
+                id: id,
+            }
+        })
+        .then((data)=>{
+            resolve(data[0]);
+        })
+        .catch(()=>reject("No result returned"));
     })
 }
-//A3
-module.exports.addItem = function(itemData){
+
+exports.addItem = (itemData)=>{
     return new Promise(function(resolve, reject){
         itemData.published = (itemData.published)? true: false;  
-        itemData.id = items.length + 1;
+        for (var i in itemData){
+            if (itemData[i]== ""){
+                itemData[i] = null;
+            }
+        }
+        itemData.postDate = new Date();
+        Item.create(itemData)
+        .then(resolve(Item.findAll()))
+        .catch(reject("Unable to create item"));
+    })
+};
         
-//A4 Set the post date to the current date
+/*A4 Set the post date to the current date
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().slice(0,10);
         itemData.postDate = formattedDate;
@@ -60,23 +116,85 @@ module.exports.addItem = function(itemData){
         resolve(itemData);
         reject("error");
     })
+}*/
+
+
+exports.getPublishedItems = ()=>{
+    return new Promise((resolve,reject)=>{
+        Item.findAll({
+            where:{
+                published: true,
+            },   
+        })
+        .then((data)=>{
+            resolve(data);
+        })
+        .catch(()=> "No result returned");
+       
+    })
 }
 
-module.exports.getItemsByCategory = function(category){
+exports.getPublishedItemsByCategory = (category)=>{
     return new Promise((resolve, reject)=>{
-        reject();
+        Item.findAll({
+            where:{
+                published: true,
+                category: category,
+            },
+        })
+        .then(resolve(Item.findAll({where:{published: true, category: category}})))
+        .catch(reject("No result returned"));
         
     })
 }
 
-module.exports.getItemsByMinDate = function(minDateStr){
-    return new Promise((resolve, reject)=>{
-        reject();
+exports.getCategories = ()=>{
+    return new Promise((resolve,reject)=>{
+        Category.findAll()
+        .then((data)=>{
+            resolve(data);
+        })
+        .catch ((err)=>{
+            reject(err);
+        })
+            
+        })
+    }
+//A5: add new store-service function
+exports.addCategory=(categoryData)=>{
+    return new Promise(function(resolve, reject){        
+        for (var i in categoryData){
+            if (categoryData[i]== ""){
+                categoryData[i] = null;
+            }
+        
+        Category.create(categoryDataData)
+        .then(resolve(Category.findAll()))
+        .catch(reject("Unable to create item"));
+    }
     })
 }
 
-module.exports.getItemById = function(id){
+exports.deleteCategoryById = (id)=>{
     return new Promise ((resolve, reject)=>{
-        reject();
+        Category.destroy({
+            where: {
+                id : id,
+            },            
+        })
+        .then(resolve())
+        .catch(reject("Unable to delete category"));
+    })
+}
+
+exports.deleteItemById = (id)=>{
+    return new Promise ((resolve, reject)=>{
+        Item.destroy({
+            where: {
+                id: id,
+            },
+        })
+        .then(resolve())
+        .catch(reject("Unable to delete post"));
     })
 }
