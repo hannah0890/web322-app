@@ -100,17 +100,7 @@ app.get("/", (req, res) => {
     res.redirect("/shop");
   });
 
-  //A4
-//set up route to addItem page
-app.get('/items/add',(req,res)=>{
-    res.render("addItem");
-});
-
-//A5: update routes to add/remove categories
-app.get('/categories/add',(req,res)=>{
-  res.render("addCategory");
-})
-
+ 
 //set up route to my about page
 app.get('/about',(req,res)=>{
     res.render("about");
@@ -139,7 +129,7 @@ app.get("/shop", async (req, res) => {
       items.sort((a, b) => new Date(b.postDate) - new Date(a.postDate));
   
       // get the latest post from the front of the list (element 0)
-      let post = items[0];
+      let item = items[0];
   
       // store the "items" and "post" data in the viewData object (to be passed to the view)
       viewData.items = items;
@@ -214,12 +204,13 @@ app.get('/shop/:id', async (req, res) => {
   });
 
 //Items route updated
-app.get("/items", (req, res) => {
+app.get("/items", function (req, res) {
     if (req.query.category) {
       const category = req.query.category;
     store_service.getItemsByCategory(category)
         .then((data) => {
-          res.render("items", { items: data});
+         if (data.length > 0) res.render("items", { items: data});
+         else res.render ("items", { message: "no result" });
         })
         .catch((error) => {
           res.render("items", { message: "no results" });
@@ -228,7 +219,8 @@ app.get("/items", (req, res) => {
       const minDateStr = req.query.minDate;
       store_service.getItemsByMinDate(minDateStr)
         .then((data) => {
-          res.render("items", { items: data});
+          if (data.length > 0) res.render("items", { items: data});
+         else res.render ("items", { message: "no result" });
         })
         .catch((error) => {
           res.render("items", { message: "no results" });
@@ -236,7 +228,8 @@ app.get("/items", (req, res) => {
     } else {
       store_service.getAllItems()
         .then((data) => {
-          res.render("items", { items: data});
+          if (data.length > 0) res.render("items", { items: data});
+         else res.render ("items", { message: "no result" });
         })
         .catch((error) => {
           res.render("items", { message: "no results" });
@@ -254,14 +247,7 @@ app.get("/item/:id",(req, res)=>{
         res.status(500).json({message: error});
     })
 })
-//A5
-app.get("/categories/delete/:id", function (req,res){
-  store_service.deleteCategoryById(req.params.id)
-  .then(res.redirect("/categories"))
-  .catch((err) =>
-  res.status(500).send("Unable to Remove Category / Category not found")
-);
-})
+
 
 app.get("/items/delete/:id", function (req,res){
   store_service.deleteItemById(req.params.id)
@@ -271,15 +257,6 @@ app.get("/items/delete/:id", function (req,res){
   );
 })
 
-//Categories route
-app.get("/categories", (req,res)=>{
-    store_service.getCategories().then((data)=>{
-        res.render("categories", {categories:data});
-    })
-    .catch((error)=>{
-        res.render("categories", {massage:error});
-    })
-});
 //A5: set up another route to listen on "/item/add" route
 app.get("/items/add", function (req,res){
   store_service.getCategories()
@@ -323,7 +300,7 @@ app.post('/items/add', upload.single('featureImage'), (req, res)=>{
         req.body.featureImage = imageUrl;
          
         // TODO: Process the req.body and add it as a new Item before redirecting to /items
-        store_service.addItem(itemData).then (()=>{
+        store_service.addItem(req.body).then ((item)=>{
         res.redirect("/items");
         })      
         .catch((error)=>{
@@ -332,11 +309,37 @@ app.post('/items/add', upload.single('featureImage'), (req, res)=>{
     } 
 });
 
-app.post ("/categories/add", function (req,res) {
-  store_service.addCategory(req.body).then(()=>{
-    res.redirect("/categories");
+//A5: Categories route
+app.get("/categories", function (req, res) {
+  store_service
+    .getCategories()
+    .then((data) => {
+    if (data.length > 0) res.render("categories", { categories: data });
+    else res.render("categories", { message: "no results" });
   })
-})
+  .catch((err) => {
+    res.render("categories", { message: "no results" });
+  });
+});
+// updating routes (server.js) to add / remove Categories & Posts
+app.get("/categories/add", function (req, res) {
+  res.render("addCategory");
+});
+
+app.post("/categories/add", function (req, res) {
+  store_service.addCategory(req.body).then(() => {
+    res.redirect("/categories");
+  });
+});
+
+app.get("/categories/delete/:id", function (req, res) {
+  store_service
+    .deleteCategoryById(req.params.id)
+    .then(res.redirect("/categories"))
+    .catch((err) =>
+      res.status(500).send("Unable to Remove Category / Category not found")
+  );
+});
 
 // 404 error handler
 app.get('*', function(req, res){
