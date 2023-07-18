@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
-var sequelize = new Sequelize('gohairtr ','gohairtr ','OtyqFw9wvLXQeKX9lcljs3WSKy91_Os-',
+var sequelize = new Sequelize('gohairtr', 'gohairtr', 'OtyqFw9wvLXQeKX9lcljs3WSKy91_Os-',
 {
-    host: 'postgres://gohairtr:OtyqFw9wvLXQeKX9lcljs3WSKy91_Os-@stampy.db.elephantsql.com/gohairtr',
+    host: 'stampy.db.elephantsql.com',
     dialect: 'postgres',
     port: 5432,
     dialectOptions: {
@@ -20,6 +20,7 @@ var sequelize = new Sequelize('gohairtr ','gohairtr ','OtyqFw9wvLXQeKX9lcljs3WSK
 });
 //A5
 const Item = sequelize.define("Item",{
+    
     body: Sequelize.TEXT,
     title: Sequelize.STRING,
     postDate: Sequelize.DATE,
@@ -33,7 +34,7 @@ const Category = sequelize.define("Category",{
 //relationship - belongsTo
 Item.belongsTo(Category,{foreignKey: "category"});
 
-exports.initialize = ()=>{
+module.exports.initialize = ()=>{
     return new Promise ((resolve, reject)=>{
         sequelize
         .sync()
@@ -42,7 +43,7 @@ exports.initialize = ()=>{
     })
 };
   
-exports.getAllItems = function(){
+module.exports.getAllItems = function(){
     return new Promise((resolve,reject)=>{
         sequelize
         .sync()
@@ -51,7 +52,7 @@ exports.getAllItems = function(){
         reject(("No results returned"));
     });
 };
-exports.getItemsByCategory = function(category){
+module.exports.getItemsByCategory = function(category){
     return new Promise((resolve, reject)=>{
         Item.findAll({
             where:{
@@ -63,7 +64,7 @@ exports.getItemsByCategory = function(category){
     });
 };
 
-exports.getItemsByMinDate = function(minDateStr){
+module.exports.getItemsByMinDate = function(minDateStr){
     return new Promise((resolve, reject)=>{
         const {gte} = Sequelize.Op;
         Item.findAll({
@@ -78,7 +79,7 @@ exports.getItemsByMinDate = function(minDateStr){
     })
 }
 
-exports.getItemById = function(id){
+module.exports.getItemById = function(id){
     return new Promise ((resolve, reject)=>{
         Item.findAll({
             where: {
@@ -92,7 +93,7 @@ exports.getItemById = function(id){
     })
 }
 
-exports.addItem = (itemData)=>{
+module.exports.addItem = (itemData)=>{
     return new Promise(function(resolve, reject){
         itemData.published = (itemData.published)? true: false;  
         for (var i in itemData){
@@ -119,7 +120,7 @@ exports.addItem = (itemData)=>{
 }*/
 
 
-exports.getPublishedItems = ()=>{
+module.exports.getPublishedItems = ()=>{
     return new Promise((resolve,reject)=>{
         Item.findAll({
             where:{
@@ -134,7 +135,7 @@ exports.getPublishedItems = ()=>{
     })
 }
 
-exports.getPublishedItemsByCategory = (category)=>{
+module.exports.getPublishedItemsByCategory = (category)=>{
     return new Promise((resolve, reject)=>{
         Item.findAll({
             where:{
@@ -148,7 +149,7 @@ exports.getPublishedItemsByCategory = (category)=>{
     })
 }
 
-exports.getCategories = ()=>{
+module.exports.getCategories = ()=>{
     return new Promise((resolve,reject)=>{
         Category.findAll()
         .then((data)=>{
@@ -161,7 +162,7 @@ exports.getCategories = ()=>{
         })
     }
 //A5: add new store-service function
-exports.addCategory=(categoryData)=>{
+module.exports.addCategory=(categoryData)=>{
     return new Promise(function(resolve, reject){        
         for (var i in categoryData){
             if (categoryData[i]== ""){
@@ -175,7 +176,7 @@ exports.addCategory=(categoryData)=>{
     })
 }
 
-exports.deleteCategoryById = (id)=>{
+module.exports.deleteCategoryById = (id)=>{
     return new Promise ((resolve, reject)=>{
         Category.destroy({
             where: {
@@ -187,7 +188,7 @@ exports.deleteCategoryById = (id)=>{
     })
 }
 
-exports.deleteItemById = (id)=>{
+module.exports.deleteItemById = (id)=>{
     return new Promise ((resolve, reject)=>{
         Item.destroy({
             where: {
