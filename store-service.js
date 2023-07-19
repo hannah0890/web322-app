@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-var sequelize = new Sequelize('gohairtr', 'gohairtr', 'OtyqFw9wvLXQeKX9lcljs3WSKy91_Os-',
+var sequelize = new Sequelize('wxnsrwqb', 'wxnsrwqb', 'xInCi6a1X0k2auYAzho0vBFneoqDaFzU',
 {
     host: 'stampy.db.elephantsql.com',
     dialect: 'postgres',
