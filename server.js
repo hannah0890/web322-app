@@ -14,6 +14,9 @@
 var express = require ("express");
 const path = require ("path");
 const store_service = require("./store-service");
+//A6
+const authData = require("./auth-service.js");
+const clientSessions = require("client-sessions");
 //A3
 const bodyParser = require("body-parser");
 const multer = require("multer");
@@ -79,6 +82,28 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 //A5: adding regular express.urlencode() middleware
 app.use(express.urlencoded({extended: true}));
+
+//A6: Setup client-sessions
+app.use(clientSessions ({
+  cookieName: "session",
+  secret: "anything-random",
+  duration: 2 * 60 * 1000,
+  activeDuration: 1000 * 60
+}));
+
+app.use(function(req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
+
+function ensureLogin(req, res, next){
+  if(!req.session.user){
+    res.redirect("/login");
+  } else{
+    next();
+  }
+}
+
 
 //welcome message
 function onHTTPSTART(){
@@ -153,7 +178,7 @@ app.get("/shop", async (req, res) => {
   });
 
 //A4
-app.get('/shop/:id', async (req, res) => {
+app.get('/shop/:id', ensureLogin, async (req, res) => {
 
     // Declare an object to store properties for the view
     let viewData = {};
@@ -204,7 +229,7 @@ app.get('/shop/:id', async (req, res) => {
   });
 
 //Items route updated
-app.get("/items", function (req, res) {
+app.get("/items", ensureLogin, (req, res)=> {
     if (req.query.category) {
       const category = req.query.category;
     store_service.getItemsByCategory(category)
@@ -249,7 +274,7 @@ app.get("/item/:id",(req, res)=>{
 })
 
 
-app.get("/items/delete/:id", function (req,res){
+app.get("/items/delete/:id", ensureLogin, (req,res) => {
   store_service.deleteItemById(req.params.id)
   .then(res.redirect("/items"))
   .catch((err)=>
@@ -258,14 +283,14 @@ app.get("/items/delete/:id", function (req,res){
 })
 
 //A5: set up another route to listen on "/item/add" route
-app.get("/items/add", function (req,res){
+app.get("/items/add", ensureLogin, (req,res)=>{
   store_service.getCategories()
   .then((data)=> res.render("addItem", {categories: data}))
   .catch((err)=> res.render("addItem", {categories: []}))
 });
 
 //A3
-app.post('/items/add', upload.single('featureImage'), (req, res)=>{
+app.post('/items/add', ensureLogin,upload.single('featureImage'), (req, res)=>{
     if(req.file){
         let streamUpload = (req) => {
             return new Promise((resolve, reject) => {
@@ -310,7 +335,7 @@ app.post('/items/add', upload.single('featureImage'), (req, res)=>{
 });
 
 //A5: Categories route
-app.get("/categories", function (req, res) {
+app.get("/categories", ensureLogin, (req, res) => {
   store_service
     .getCategories()
     .then((data) => {
@@ -322,17 +347,17 @@ app.get("/categories", function (req, res) {
   });
 });
 // updating routes (server.js) to add / remove Categories & Posts
-app.get("/categories/add", function (req, res) {
+app.get("/categories/add", ensureLogin, (req, res) => {
   res.render("addCategory");
 });
 
-app.post("/categories/add", function (req, res) {
+app.post("/categories/add", ensureLogin, (req, res) => {
   store_service.addCategory(req.body).then(() => {
     res.redirect("/categories");
   });
 });
 
-app.get("/categories/delete/:id", function (req, res) {
+app.get("/categories/delete/:id", ensureLogin, (req, res) => {
   store_service
     .deleteCategoryById(req.params.id)
     .then(res.redirect("/categories"))
@@ -340,6 +365,55 @@ app.get("/categories/delete/:id", function (req, res) {
       res.status(500).send("Unable to Remove Category / Category not found")
   );
 });
+
+//A6 Get Login page route
+app.get("/login", (req,res)=>{
+  res.render("login");
+})
+
+//A6 Get Register page route
+app.get("/register", (req,res)=>{
+  res.render("register");
+})
+
+//A6 Post Login page route
+app.post("/login", (req,res)=>{
+  req.body.userAgent = req.get('User-Agent');
+  authData.checkUser(req.body)
+  .then((user)=>{
+    req.session.user = {
+      userName: user.userName,
+      email: user.email,
+      loginHistory: user.loginHistory
+    };
+    res.redirect('/items');
+  })
+  .catch((err)=>{
+    res.render('login', {errorMessage: err, userName: req.body.userName});
+  });
+})
+
+//A6 Post Register page route
+app.post("/register",(req,res) =>{
+  authData.registerUser(req.body)
+  .then(()=>{
+    res.render('register', {successMessage: 'User created'});
+  })
+  .catch((err)=>{
+    res.render('register', {errorMessage: err, userName: req.body.userName});
+  });
+})
+
+//A6 Logout route
+app.get("/logout",(req,res)=>{
+  req.session.reset();
+  res.redirect("/");
+})
+
+//A6 User History route
+app.get("/userHistory", ensureLogin,(req,res) => {
+  res.render("userHistory");
+})
 
 // 404 error handler
 app.get('*', function(req, res){
@@ -350,9 +424,13 @@ app.get('*', function(req, res){
     res.status(404).send("Page does not exist")
   })
   
-//app.listen(HTTP_PORT,onHTTPSTART);
-store_service.initialize().then(function(){
-      app.listen(HTTP_PORT,onHTTPSTART);
+//Update for A6 - app.listen(HTTP_PORT,onHTTPSTART);
+store_service.initialize()
+.then(authData.initialize)
+  .then(function() {
+    app.listen(HTTP_PORT, function(){
+      console.log("app listening on: " + HTTP_PORT)
+    });     
 }).catch(function(err){
   console.log("Unable to start server:" + err);
-})
+});
