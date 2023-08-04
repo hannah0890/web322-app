@@ -12,7 +12,7 @@ const userSchema = new Schema({
     "email": String,
     "loginHistory": [
         {
-            "dataTime": Date,
+            "dateTime": Date,
             "userAgent": String
         }
     ]
@@ -76,7 +76,7 @@ module.exports.checkUser = function(userData){
             }else{
                 bcrypt.compare(userData.password, users[0].password).then((result)=>{
                     if(result){
-                        users[0].loginHistory.push({dateTime: (new Date()).toString(),userAgent: userData.userAgent});
+                        users[0].loginHistory.push({dateTime:(new Date()).toString(),userAgent: userData.userAgent});
                         User.updateOne({userName: users[0].userName},
                             {$set: {loginHistory: users[0].loginHistory}}).then(()=>{
                                 resolve(users[0]);
